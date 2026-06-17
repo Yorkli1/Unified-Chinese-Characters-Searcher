@@ -14,12 +14,12 @@ export class SearchHook {
   private lastUserValue = '';
   private observeTimer: number | null = null;
   private debounceTimer: number | null = null;
-  private readonly DEBOUNCE_MS = 800;
 
   constructor(
     private direction: Direction,
     private keepOperators: boolean,
     private silentMode: boolean,
+    private debounceMs: number,
   ) {
     this.converter = new ChineseConverter();
   }
@@ -35,6 +35,10 @@ export class SearchHook {
 
   setSilentMode(silent: boolean): void {
     this.silentMode = silent;
+  }
+
+  setDebounceMs(ms: number): void {
+    this.debounceMs = ms;
   }
 
   hook(): boolean {
@@ -206,7 +210,7 @@ export class SearchHook {
       if (input.value === originalValue) {
         this._doExpand(input, originalValue);
       }
-    }, this.DEBOUNCE_MS);
+    }, this.debounceMs);
   }
 
   private _doExpand(input: HTMLInputElement, originalValue: string): void {
