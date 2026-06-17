@@ -51,6 +51,7 @@ export default class STSearchPlugin extends Plugin {
   private _tryHook(): void {
     if (!this.settings.enabled) return;
     if (this.searchHook) {
+      this.searchHook.setRegion(this.settings.region);
       this.searchHook.setSilentMode(this.settings.silentMode);
       this.searchHook.setKeepOperators(this.settings.keepOperators);
       this.searchHook.setDebounceMs(this.settings.debounceMs);
@@ -58,7 +59,7 @@ export default class STSearchPlugin extends Plugin {
     }
 
     const hook = new SearchHook(
-      'bidirectional',
+      this.settings.region,
       this.settings.keepOperators,
       this.settings.silentMode,
       this.settings.debounceMs,

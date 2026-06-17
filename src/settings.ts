@@ -1,8 +1,10 @@
 import { App, PluginSettingTab, Setting } from 'obsidian';
 import type STSearchPlugin from './main';
+import { variantStats, type Region } from './converter';
 
 export interface STSearchSettings {
   enabled: boolean;
+  region: Region;
   keepOperators: boolean;
   silentMode: boolean;
   debounceMs: number;
@@ -10,6 +12,7 @@ export interface STSearchSettings {
 
 export const DEFAULT_SETTINGS: STSearchSettings = {
   enabled: true,
+  region: 'hk',
   keepOperators: true,
   silentMode: false,
   debounceMs: 800,
@@ -52,19 +55,25 @@ export class STSearchSettingTab extends PluginSettingTab {
       );
 
     new Setting(containerEl)
-      .setName('匹配方式')
-      .setDesc('雙向：不論用簡/繁體字搜索，結果都將包含簡體和繁體。')
+      .setName('映射地區')
+      .setDesc('選擇繁簡轉換的地區變體。不同地區的繁體寫法略有差異。')
       .addDropdown(dropdown =>
         dropdown
-          .addOption('bidirectional', '雙向')
-          .setValue('bidirectional')
-          .setDisabled(true)
+          .addOption('hk', '繁體（香港）')
+          .addOption('tw', '繁體（台灣）')
+          .addOption('all', '全部地區')
+          .setValue(this.plugin.settings.region)
+          .onChange(async value => {
+            this.plugin.settings.region = value as Region;
+            await this.plugin.saveSettings();
+            this.plugin.reevaluate();
+          })
       );
 
     // ════════════════════════════════════════
-    //  高級設置
+    //  高級功能
     // ════════════════════════════════════════
-    containerEl.createEl('h3', { text: '高級設置' });
+    containerEl.createEl('h3', { text: '高級功能' });
 
     // ── 轉換運算符值 ──
     new Setting(containerEl)
@@ -141,8 +150,24 @@ export class STSearchSettingTab extends PluginSettingTab {
     containerEl.createEl('h3', { text: '關於' });
 
     const about = containerEl.createEl('div', { cls: 'setting-item' });
-    about.createEl('p', {
-      text: '字符映射表基於 OpenCC（開放中文轉換）官方數據，包含 4,011 個簡→繁及 4,142 個繁→簡字符映射。',
+
+    // ── 映射數據量 ──
+    const statsDiv = about.createEl('div');
+    statsDiv.style.cssText = `
+      padding: 8px 12px;
+      background: var(--background-secondary);
+      border-radius: 6px;
+      font-size: var(--font-smaller);
+      line-height: 1.8;
+      margin-bottom: 12px;
+    `;
+    statsDiv.createEl('p', { text: '字符映射數據' });
+    statsDiv.createEl('p', { text: `簡→繁: ${variantStats.s2tCount} 條映射` });
+    statsDiv.createEl('p', { text: `繁→簡: ${variantStats.t2sCount} 條映射` });
+    statsDiv.createEl('p', { text: `香港變體: ${variantStats.hkVariantCount} 條` });
+    statsDiv.createEl('p', { text: `台灣變體: ${variantStats.twVariantCount} 條` });
+    statsDiv.createEl('p', {
+      text: `來源: ${variantStats.source} · 版本: ${variantStats.version}`,
     });
     about.createEl('p', {
       text: '插件僅處理字對字轉換，不含短語/慣用語層級。完全離線運行，零外部請求。',

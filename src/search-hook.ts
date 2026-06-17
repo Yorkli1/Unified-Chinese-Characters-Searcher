@@ -1,4 +1,4 @@
-import { Direction, ChineseConverter } from './converter';
+import { ChineseConverter, type Region } from './converter';
 
 /**
  * 搜索攔截器 — 掛載到 Obsidian 的全局搜索輸入框
@@ -16,16 +16,17 @@ export class SearchHook {
   private debounceTimer: number | null = null;
 
   constructor(
-    private direction: Direction,
+    region: Region,
     private keepOperators: boolean,
     private silentMode: boolean,
     private debounceMs: number,
   ) {
     this.converter = new ChineseConverter();
+    this.converter.setRegion(region);
   }
 
-  setDirection(dir: Direction): void {
-    this.direction = dir;
+  setRegion(region: Region): void {
+    this.converter.setRegion(region);
     if (this.inputEl) this._processInput(this.inputEl);
   }
 
@@ -167,7 +168,7 @@ export class SearchHook {
     }
 
     // 7. 不需要轉換（同方向文字）
-    if (!this.converter.needsConversion(currentValue, this.direction)) {
+    if (!this.converter.needsConversion(currentValue)) {
       this.lastUserValue = currentValue;
       return;
     }
@@ -240,9 +241,10 @@ export class SearchHook {
 
     for (const token of tokens) {
       if (token.type === 'plain' && this.converter.hasChinese(token.value)) {
-        const converted = this.converter.getVariant(token.value, this.direction);
-        if (converted !== token.value) {
-          newTokens.push(`(${token.value}) OR (${converted})`);
+        const variants = this.converter.getVariants(token.value);
+        if (variants.length > 0) {
+          const terms = [token.value, ...variants];
+          newTokens.push(`(${terms.join(') OR (')})`);
           continue;
         }
       }

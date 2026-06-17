@@ -1,66 +1,115 @@
-import s2tData from './data/s2t.json';
-import t2sData from './data/t2s.json';
+import s2tGen from './data/s2t.json';
+import t2sGen from './data/t2s.json';
+import s2hk from './data/s2hk.json';
+import t2hk from './data/t2hk.json';
+import s2tw from './data/s2tw.json';
+import t2tw from './data/t2tw.json';
+import s2all from './data/s2all.json';
+import hkVariants from './data/hk_variants.json';
+import twVariants from './data/tw_variants.json';
 
-export type Direction = 's2t' | 't2s' | 'bidirectional';
+export type Region = 'hk' | 'tw' | 'all';
+
+export interface VariantStats {
+  s2tCount: number;
+  t2sCount: number;
+  hkVariantCount: number;
+  twVariantCount: number;
+  source: string;
+  version: string;
+}
+
+export const variantStats: VariantStats = {
+  s2tCount: Object.keys(s2tGen).length,
+  t2sCount: Object.keys(t2sGen).length,
+  hkVariantCount: Object.keys(hkVariants).length,
+  twVariantCount: Object.keys(twVariants).length,
+  source: 'OpenCC',
+  version: '2024',
+};
 
 /**
- * 字符級繁簡轉換引擎
- * 純字對字轉換，不含短語/慣用語
+ * 繁簡轉換引擎 — 支援多地區變體
  */
 export class ChineseConverter {
-  private s2tMap: Map<string, string>;
-  private t2sMap: Map<string, string>;
+  private region: Region = 'hk';
 
-  constructor() {
-    this.s2tMap = new Map(Object.entries(s2tData));
-    this.t2sMap = new Map(Object.entries(t2sData));
+  setRegion(region: Region): void {
+    this.region = region;
+  }
+
+  getRegion(): Region {
+    return this.region;
   }
 
   /**
-   * 根據指定方向轉換字符串中的中文字符
+   * 返回一個字的所有變體（不含原始字本身）
+   * 例如: 线 → ['線'] (HK), 线 → ['綫'] (TW), 线 → ['線', '綫'] (ALL)
    */
-  convert(text: string, direction: Direction): string {
-    switch (direction) {
-      case 's2t':
-        return this._convertWithMap(text, this.s2tMap);
-      case 't2s':
-        return this._convertWithMap(text, this.t2sMap);
-      case 'bidirectional':
-        return this._convertWithMap(text, this.s2tMap);
+  getVariants(char: string): string[] {
+    const s2tMap = this._getS2TMap();
+    const t2sMap = this._getT2SMap();
+
+    const variants = new Set<string>();
+
+    // 簡→繁方向：找傳統寫法
+    const trad = s2tMap.get(char);
+    if (trad !== undefined) {
+      if (Array.isArray(trad)) {
+        for (const t of trad) variants.add(t);
+      } else {
+        variants.add(trad);
+      }
     }
+
+    // 繁→簡方向：找簡體寫法
+    const simp = t2sMap.get(char);
+    if (simp !== undefined) variants.add(simp);
+
+    return [...variants].filter(v => v !== char);
   }
 
   /**
-   * 獲取文本中中文字符的另一種寫法（簡/繁）
-   * 返回轉換後的完整字符串
+   * 檢查文字是否需要轉換（是否有任意字符有變體）
    */
-  getVariant(text: string, direction: Direction): string {
-    return this.convert(text, direction);
+  needsConversion(text: string): boolean {
+    for (const ch of text) {
+      const variants = this.getVariants(ch);
+      if (variants.length > 0) return true;
+    }
+    return false;
   }
 
   /**
-   * 判斷字符串是否包含中文字符
+   * 檢查文字是否包含中文字符
    */
   hasChinese(text: string): boolean {
     return /[\u4e00-\u9fff\u3400-\u4dbf\uf900-\ufaff]/.test(text);
   }
 
-  /**
-   * 判斷字符串是否需要轉換（包含可轉換的中文字符）
-   */
-  needsConversion(text: string, direction: Direction): boolean {
-    const map = direction === 't2s' ? this.t2sMap : this.s2tMap;
-    for (const ch of text) {
-      if (map.has(ch)) return true;
+  private _getS2TMap(): Map<string, string | string[]> {
+    switch (this.region) {
+      case 'tw': return new Map(Object.entries(s2tw));
+      case 'all': {
+        // s2all stores values as arrays
+        const m = new Map<string, string[]>();
+        for (const [k, v] of Object.entries(s2all)) {
+          m.set(k, v as string[]);
+        }
+        return m as Map<string, string | string[]>;
+      }
+      case 'hk':
+      default:
+        return new Map(Object.entries(s2hk));
     }
-    return false;
   }
 
-  private _convertWithMap(text: string, map: Map<string, string>): string {
-    let result = '';
-    for (const ch of text) {
-      result += map.get(ch) ?? ch;
+  private _getT2SMap(): Map<string, string> {
+    switch (this.region) {
+      case 'tw': return new Map(Object.entries(t2tw));
+      case 'hk':
+      default:
+        return new Map(Object.entries(t2hk));
     }
-    return result;
   }
 }
