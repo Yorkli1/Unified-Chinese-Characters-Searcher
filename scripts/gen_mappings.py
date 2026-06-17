@@ -114,6 +114,14 @@ for simp, general in s2t_general.items():
 # Build HK↔TW bidirectional mapping
 hk_tw_bidi = build_hk_tw_bidi(hk_variants, tw_variants)
 
+print("Downloading STPhrases.txt (simplified→traditional phrases)...")
+st_phrases = parse_dict(f"{BASE}/STPhrases.txt", single_char=False)
+print(f"  {len(st_phrases)} entries")
+
+print("Downloading TSPhrases.txt (traditional→simplified phrases)...")
+ts_phrases = parse_dict(f"{BASE}/TSPhrases.txt", single_char=False)
+print(f"  {len(ts_phrases)} entries")
+
 os.makedirs('../src/data', exist_ok=True)
 
 def write_json(name, data):
@@ -132,6 +140,8 @@ write_json('s2all.json', s2t_all)
 write_json('hk_variants.json', hk_variants)
 write_json('tw_variants.json', tw_variants)
 write_json('hk_tw.json', hk_tw_bidi)
+write_json('st_phrases.json', st_phrases)
+write_json('ts_phrases.json', ts_phrases)
 
 print(f"\n{'='*50}")
 print(f"Files written:")

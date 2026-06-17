@@ -20,6 +20,7 @@ export class SearchHook {
     private keepOperators: boolean,
     private silentMode: boolean,
     private debounceMs: number,
+    private phraseEnabled: boolean,
   ) {
     this.converter = new ChineseConverter();
     this.converter.setRegion(region);
@@ -40,6 +41,10 @@ export class SearchHook {
 
   setDebounceMs(ms: number): void {
     this.debounceMs = ms;
+  }
+
+  setPhraseEnabled(enabled: boolean): void {
+    this.phraseEnabled = enabled;
   }
 
   hook(): boolean {
@@ -241,9 +246,23 @@ export class SearchHook {
 
     for (const token of tokens) {
       if (token.type === 'plain' && this.converter.hasChinese(token.value)) {
-        const variants = this.converter.getVariants(token.value);
-        if (variants.length > 0) {
-          const terms = [token.value, ...variants];
+        const terms: string[] = [token.value];
+
+        // 短語層級：完整詞匹配
+        if (this.phraseEnabled) {
+          const phraseVariant = this.converter.getPhraseVariant(token.value);
+          if (phraseVariant && phraseVariant !== token.value) {
+            terms.push(phraseVariant);
+          }
+        }
+
+        // 字符層級：逐字轉換
+        const charVariants = this.converter.getVariants(token.value);
+        for (const v of charVariants) {
+          if (!terms.includes(v)) terms.push(v);
+        }
+
+        if (terms.length > 1) {
           newTokens.push(`(${terms.join(') OR (')})`);
           continue;
         }

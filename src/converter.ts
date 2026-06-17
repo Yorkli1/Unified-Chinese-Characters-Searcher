@@ -8,6 +8,8 @@ import s2all from './data/s2all.json';
 import hkVariants from './data/hk_variants.json';
 import twVariants from './data/tw_variants.json';
 import hkTwBidi from './data/hk_tw.json';
+import stPhrases from './data/st_phrases.json';
+import tsPhrases from './data/ts_phrases.json';
 
 export type Region = 'hk' | 'tw' | 'all' | 'tw-hk';
 
@@ -16,6 +18,8 @@ export interface VariantStats {
   t2sCount: number;
   hkVariantCount: number;
   twVariantCount: number;
+  stPhraseCount: number;
+  tsPhraseCount: number;
   source: string;
   version: string;
 }
@@ -25,6 +29,8 @@ export const variantStats: VariantStats = {
   t2sCount: Object.keys(t2sGen).length,
   hkVariantCount: Object.keys(hkVariants).length,
   twVariantCount: Object.keys(twVariants).length,
+  stPhraseCount: Object.keys(stPhrases).length,
+  tsPhraseCount: Object.keys(tsPhrases).length,
   source: 'OpenCC',
   version: '2024',
 };
@@ -34,6 +40,13 @@ export const variantStats: VariantStats = {
  */
 export class ChineseConverter {
   private region: Region = 'hk';
+  private s2tPhraseMap: Map<string, string>;
+  private t2sPhraseMap: Map<string, string>;
+
+  constructor() {
+    this.s2tPhraseMap = new Map(Object.entries(stPhrases));
+    this.t2sPhraseMap = new Map(Object.entries(tsPhrases));
+  }
 
   setRegion(region: Region): void {
     this.region = region;
@@ -41,6 +54,20 @@ export class ChineseConverter {
 
   getRegion(): Region {
     return this.region;
+  }
+
+  /**
+   * 查詢短語/成語的繁簡變體
+   * 例如: 自行车 → 腳踏車, 一絲不掛 → 一丝不挂
+   */
+  getPhraseVariant(text: string): string | undefined {
+    // 先查簡→繁
+    const s2t = this.s2tPhraseMap.get(text);
+    if (s2t) return s2t;
+    // 再查繁→簡
+    const t2s = this.t2sPhraseMap.get(text);
+    if (t2s) return t2s;
+    return undefined;
   }
 
   /**
