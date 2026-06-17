@@ -212,11 +212,13 @@ export class STSearchSettingTab extends PluginSettingTab {
     statsDiv.createEl('p', { text: `TSCharacters.txt  — ${variantStats.t2sCount} 條 繁→簡（通用）` });
     statsDiv.createEl('p', { text: `HKVariants.txt    — ${variantStats.hkVariantCount} 條 香港變體` });
     statsDiv.createEl('p', { text: `TWVariants.txt    — ${variantStats.twVariantCount} 條 台灣變體` });
+    statsDiv.createEl('p', { text: `STPhrases.txt     — ${variantStats.stPhraseCount} 條 短語（按需載入）` });
+    statsDiv.createEl('p', { text: `TSPhrases.txt     — ${variantStats.tsPhraseCount} 條 短語（按需載入）` });
     statsDiv.createEl('p', {
       text: `來源: ${variantStats.source} · 版本: ${variantStats.version}`,
     });
     about.createEl('p', {
-      text: '總計 5 份映射表，完全離線運行。插件僅處理字對字轉換，不含短語/慣用語層級。',
+      text: '總計 7 份映射表，6 份打包於 main.js，短語表 st_phrases.json + ts_phrases.json 按需載入。完全離線運行。',
     });
 
     // ── GitHub 按鈕 ──
