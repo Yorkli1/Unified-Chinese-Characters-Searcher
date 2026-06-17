@@ -10,7 +10,10 @@ export class SearchHook {
   private converter: ChineseConverter;
   private inputEl: HTMLInputElement | null = null;
   private isUpdating = false;
-  private lastRawValue = '';
+  /** 插件最後一次展開後的值（用於檢測用戶是否在刪除） */
+  private lastExpandedValue = '';
+  /** 用戶最後一次手動輸入後的值（排除插件自動展開） */
+  private lastUserValue = '';
   private observeTimer: number | null = null;
 
   constructor(
@@ -22,7 +25,6 @@ export class SearchHook {
 
   setDirection(dir: Direction): void {
     this.direction = dir;
-    // Re-process current value
     if (this.inputEl) {
       this._processInput(this.inputEl);
     }
@@ -34,7 +36,6 @@ export class SearchHook {
 
   /**
    * 查找並 hook 到搜索輸入框
-   * 應在 workspace layout-change 事件中調用
    */
   hook(): boolean {
     const searchLeaf = app.workspace.getLeavesOfType('search')[0];
@@ -43,23 +44,18 @@ export class SearchHook {
     const container = (searchLeaf.view as any)?.containerEl as HTMLElement | null;
     if (!container) return false;
 
-    // 查找輸入框
     const input = container.querySelector(
       '.search-input-container input, input[type="search"], input[placeholder*="搜索"], input[placeholder*="Search"], input[placeholder*="搜尋"]'
     ) as HTMLInputElement | null;
     if (!input) return false;
 
-    // 避免重複 hook
     if (this.inputEl === input) return true;
     this._unhook();
     this.inputEl = input;
 
-    // 用 input 事件監聽（比 onChange 更即時）
     input.addEventListener('input', this._onInput);
-    // 也用 MutationObserver 兜底（處理 Obsidian 虛擬 DOM 替換）
     this._setupFallback(container);
 
-    // 立即處理當前值
     this._processInput(input);
 
     return true;
@@ -80,9 +76,6 @@ export class SearchHook {
     }
   }
 
-  /**
-   * 兜底定時器：某些 Obsidian 版本會在切換視圖時重新創建 DOM
-   */
   private _setupFallback(container: HTMLElement): void {
     if (this.observeTimer !== null) return;
     this.observeTimer = window.setInterval(() => {
@@ -90,7 +83,6 @@ export class SearchHook {
         '.search-input-container input, input[type="search"]'
       );
       if (input && input !== this.inputEl) {
-        // 搜索框被重建了，重新 hook
         this.inputEl?.removeEventListener('input', this._onInput);
         this.inputEl = input;
         input.addEventListener('input', this._onInput);
@@ -104,39 +96,85 @@ export class SearchHook {
     this._processInput(input);
   };
 
+  /**
+   * 處理搜索輸入變化
+   * 
+   * 安全策略（防止無限循環展開）：
+   * 1. 如果值變短了（用戶在退格/刪除），跳過展開
+   * 2. 如果游標不在輸入框末尾，跳過（用戶在中間編輯）
+   * 3. 如果查詢已包含 OR 展開模式，跳過
+   * 4. 如果 isUpdating 為 true（我們自己在更新），跳過
+   */
   private _processInput(input: HTMLInputElement): void {
     if (this.isUpdating) return;
 
-    const rawValue = input.value;
-    if (rawValue === this.lastRawValue) return;
-    this.lastRawValue = rawValue;
+    const currentValue = input.value;
 
-    // 如果已經包含我們的 OR 展開（啟發式檢測），跳過
-    if (this._looksAlreadyExpanded(rawValue)) return;
+    // ── 安全檢查 1：值沒變 → 跳過 ──
+    if (currentValue === this.lastUserValue) return;
 
-    // 檢查是否需要轉換
-    if (!this.converter.hasChinese(rawValue)) return;
-    if (!this.converter.needsConversion(rawValue, this.direction)) return;
+    // ── 安全檢查 2：用戶在刪除（值變短了）→ 跳過 ──
+    if (currentValue.length < this.lastUserValue.length) {
+      this.lastUserValue = currentValue;
+      return;
+    }
 
-    // 解析、轉換、重建
-    const expanded = this._expandQuery(rawValue);
-    if (!expanded || expanded === rawValue) return;
+    // ── 安全檢查 3：游標不在末尾（用戶在中間編輯）→ 跳過 ──
+    if (input.selectionStart !== null && input.selectionStart !== currentValue.length) {
+      this.lastUserValue = currentValue;
+      return;
+    }
+
+    // ── 安全檢查 4：已經被我們展開過 → 跳過 ──
+    if (this._looksAlreadyExpanded(currentValue)) {
+      this.lastUserValue = currentValue;
+      return;
+    }
+
+    // ── 安全檢查 5：沒有中文 → 跳過 ──
+    if (!this.converter.hasChinese(currentValue)) {
+      this.lastUserValue = currentValue;
+      return;
+    }
+
+    // ── 安全檢查 6：查詢中有 OR → 已是複雜查詢，不自動展開 ──
+    if (/\bOR\b/i.test(currentValue)) {
+      this.lastUserValue = currentValue;
+      return;
+    }
+
+    // ── 安全檢查 7：不需要轉換（全是同方向的字） → 跳過 ──
+    if (!this.converter.needsConversion(currentValue, this.direction)) {
+      this.lastUserValue = currentValue;
+      return;
+    }
+
+    // ── 執行展開 ──
+    const expanded = this._expandQuery(currentValue);
+    if (!expanded || expanded === currentValue) return;
+
+    // 記住展開前的值，用於檢測刪除
+    this.lastUserValue = currentValue;
+    this.lastExpandedValue = expanded;
 
     // 更新搜索框
     this.isUpdating = true;
     input.value = expanded;
-    // 觸發 Obsidian 的搜索更新 (input + Enter 事件)
+    // 觸發 Obsidian 的搜索更新
     input.dispatchEvent(new Event('input', { bubbles: true }));
     input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
     this.isUpdating = false;
   }
 
   /**
-   * 檢測查詢是否已經被我們展開過
-   * 啟發式：如果查詢包含 ") OR (" 模式則視為已展開
+   * 檢測查詢是否已經被展開過
+   * 
+   * 匹配我們插入的典型模式: (原詞) OR (轉換詞)
+   * 例如: (剑) OR (劍), (剑法) OR (劍法)
    */
   private _looksAlreadyExpanded(query: string): boolean {
-    return /\)\s*OR\s*\(/.test(query);
+    // 檢查典型展開模式: (詞) OR (詞)
+    return /\([^)]+\)\s+OR\s+\([^)]+\)/.test(query);
   }
 
   /**
@@ -171,7 +209,6 @@ export class SearchHook {
     let match: RegExpExecArray | null;
 
     while ((match = re.exec(query)) !== null) {
-      // 捕獲兩個 token 之間的空格
       if (match.index > lastIndex) {
         const ws = query.slice(lastIndex, match.index);
         if (ws) tokens.push({ type: 'whitespace', raw: ws, value: ws });
@@ -196,10 +233,9 @@ export class SearchHook {
       lastIndex = match.index + match[0].length;
     }
 
-    // 尾部空白
     if (lastIndex < query.length) {
       const remaining = query.slice(lastIndex);
-      tokens.push({ type: 'whitespace', raw: remaining, value: remaining });
+      if (remaining) tokens.push({ type: 'whitespace', raw: remaining, value: remaining });
     }
 
     return tokens;
@@ -212,5 +248,4 @@ interface Token {
   value: string;
 }
 
-// 全局 app 引用 — Obsidian 插件在運行時可訪問
 declare var app: any;
