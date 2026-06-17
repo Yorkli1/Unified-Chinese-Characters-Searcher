@@ -89,7 +89,7 @@ export class STSearchSettingTab extends PluginSettingTab {
     table.style.cssText = 'width:100%; border-collapse: collapse;';
     const thead = table.createEl('thead');
     const headerRow = thead.createEl('tr');
-    const headers = ['模式', '用戶輸入(簡/繁)', '展開結果'];
+    const headers = ['模式', '用戶輸入(簡/繁)', '涵蓋搜索結果'];
     for (const h of headers) {
       headerRow.createEl('th', { text: h }).style.cssText = 'text-align:left; padding:4px 8px; border-bottom:1px solid var(--background-modifier-border);';
     }
@@ -116,7 +116,7 @@ export class STSearchSettingTab extends PluginSettingTab {
     // ── 轉換運算符值 ──
     new Setting(containerEl)
       .setName('轉換運算符值')
-      .setDesc('開啟後 path:、tag:、file: 等搜索運算符後面的中文也會被轉換。')
+      .setDesc('開啟後 path:、tag:、file: 等搜索運算符後面的中文也會按照映射地區而轉換。')
       .addToggle(toggle =>
         toggle
           .setValue(this.plugin.settings.keepOperators)
@@ -139,17 +139,9 @@ export class STSearchSettingTab extends PluginSettingTab {
       font-size: var(--font-smaller);
       line-height: 1.6;
     `;
-    opDesc.createEl('p', { text: '什麼是搜索運算符？' });
-    opDesc.createEl('p', {
-      text: '在 Obsidian 全局搜索中，你可以使用 path:、tag:、file: 等運算符來限定搜索範圍。例如：',
-    });
-    const opList = opDesc.createEl('ul');
-    opList.createEl('li', { text: 'path:劍法.md  → 只搜索檔案路徑包含「劍法」的檔案' });
-    opList.createEl('li', { text: 'tag:劍術       → 只搜索包含 #劍術 標籤的檔案' });
-    opDesc.createEl('p', { text: '開啟此選項後，運算符後面的中文也會被一併轉換：' });
-    opList.createEl('li', { text: 'path:剑法.md → path:剑法.md OR path:劍法.md  ← 同時命中簡繁路徑' });
-    opList.createEl('li', { text: 'tag:劍術 → tag:劍術 OR tag:剑术  ← 同時命中簡繁標籤' });
-    opDesc.createEl('p', { text: '關閉則只轉換純文字，運算符後的值保持原樣。' });
+    opDesc.createEl('p', { text: '例如選用「全部地區」時：' });
+    opDesc.createEl('p', { text: 'tag:里巷 → tag:里巷 OR tag:裏巷 OR tag:裡巷' });
+    opDesc.createEl('p', { text: '關閉則運算符後的值保持原樣。' });
 
     // ── 展開延遲 ──
     new Setting(containerEl)
