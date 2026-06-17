@@ -70,6 +70,44 @@ export class STSearchSettingTab extends PluginSettingTab {
           })
       );
 
+    // ── 地區差異對照 ──
+    const regionNote = containerEl.createEl('div', {
+      cls: 'setting-item-description',
+    });
+    regionNote.style.cssText = `
+      margin: 0 0 12px 0;
+      padding: 8px 12px;
+      background: var(--background-secondary);
+      border-radius: 6px;
+      font-size: var(--font-smaller);
+      line-height: 1.6;
+    `;
+    regionNote.createEl('p', { text: '不同地區的繁體寫法差異範例：' });
+
+    const table = regionNote.createEl('table');
+    table.style.cssText = 'width:100%; border-collapse: collapse;';
+    const thead = table.createEl('thead');
+    const headerRow = thead.createEl('tr');
+    headerRow.createEl('th', { text: '輸入' }).style.cssText = 'text-align:left; padding:4px 8px; border-bottom:1px solid var(--background-modifier-border);';
+    headerRow.createEl('th', { text: '香港' }).style.cssText = 'text-align:left; padding:4px 8px; border-bottom:1px solid var(--background-modifier-border);';
+    headerRow.createEl('th', { text: '台灣' }).style.cssText = 'text-align:left; padding:4px 8px; border-bottom:1px solid var(--background-modifier-border);';
+    headerRow.createEl('th', { text: '全部地區' }).style.cssText = 'text-align:left; padding:4px 8px; border-bottom:1px solid var(--background-modifier-border);';
+
+    const tbody = table.createEl('tbody');
+    const rows = [
+      ['里', '裏', '裡', '裏、裡'],
+      ['峰', '峯', '峰', '峯、峰'],
+      ['群', '羣', '群', '羣、群'],
+      ['线', '線', '綫', '線、綫'],
+    ];
+    for (const [input, hk, tw, all] of rows) {
+      const tr = tbody.createEl('tr');
+      tr.createEl('td', { text: input }).style.cssText = 'padding:2px 8px;';
+      tr.createEl('td', { text: hk }).style.cssText = 'padding:2px 8px;';
+      tr.createEl('td', { text: tw }).style.cssText = 'padding:2px 8px;';
+      tr.createEl('td', { text: all }).style.cssText = 'padding:2px 8px;';
+    }
+
     // ════════════════════════════════════════
     //  高級功能
     // ════════════════════════════════════════
