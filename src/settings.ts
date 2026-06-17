@@ -32,9 +32,9 @@ export class STSearchSettingTab extends PluginSettingTab {
     const { containerEl } = this;
     containerEl.empty();
 
-    containerEl.createEl('h2', { text: '統一中文搜索工具' });
+    containerEl.createEl('h2', { text: 'Unified Chinese-characters Searcher (UCCS)' });
     containerEl.createEl('p', {
-      text: 'Unified Chinese Search — 在 Obsidian 全局搜索中自動匹配多種地區的中文，讓你輸入任何一個中文字都能找到所有對應中文的結果。',
+      text: '在 Obsidian 全局搜索中自動匹配多種地區的中文，讓你輸入任何一個中文字都能找到所有對應中文的結果。',
       cls: 'setting-item-description',
     });
 
@@ -213,5 +213,22 @@ export class STSearchSettingTab extends PluginSettingTab {
             open('https://ko-fi.com/omgyork');
           })
       );
+
+    // ── 版權與授權 ──
+    const notice = containerEl.createEl('p', {
+      cls: 'setting-item-description',
+    });
+    notice.style.cssText = `
+      margin-top: 16px;
+      font-size: var(--font-smallest);
+      color: var(--text-muted);
+      line-height: 1.5;
+    `;
+    notice.createEl('span', { text: '字符映射數據源自 ' });
+    notice.createEl('a', {
+      text: 'OpenCC',
+      href: 'https://github.com/BYVoid/OpenCC',
+    });
+    notice.createEl('span', { text: '（Apache License 2.0）。本插件僅做格式轉換，不修改原始映射關係。' });
   }
 }
