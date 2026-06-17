@@ -53,7 +53,7 @@ export class STSearchSettingTab extends PluginSettingTab {
 
     new Setting(containerEl)
       .setName('匹配方式')
-      .setDesc('雙向：輸入「剑」或「劍」，結果同時包含簡體與繁體。')
+      .setDesc('雙向：不論用簡/繁體字搜索，結果都將包含簡體和繁體。')
       .addDropdown(dropdown =>
         dropdown
           .addOption('bidirectional', '雙向')
@@ -66,34 +66,7 @@ export class STSearchSettingTab extends PluginSettingTab {
     // ════════════════════════════════════════
     containerEl.createEl('h3', { text: '高級設置' });
 
-    new Setting(containerEl)
-      .setName('隱式模式')
-      .setDesc('搜索欄只顯示你輸入的原文（如「剑」），不顯示展開後的 (剑) OR (劍)。結果仍會同時包含繁簡匹配。')
-      .addToggle(toggle =>
-        toggle
-          .setValue(this.plugin.settings.silentMode)
-          .onChange(async value => {
-            this.plugin.settings.silentMode = value;
-            await this.plugin.saveSettings();
-            this.plugin.reevaluate();
-          })
-      );
-
-    new Setting(containerEl)
-      .setName('展開延遲')
-      .setDesc('打字結束後等待多少毫秒再展開查詢。數值越小展開越快，但容易在打字中途誤展開。推薦 600–1000ms。')
-      .addSlider(slider =>
-        slider
-          .setLimits(200, 2000, 100)
-          .setValue(this.plugin.settings.debounceMs)
-          .setDynamicTooltip()
-          .onChange(async value => {
-            this.plugin.settings.debounceMs = value;
-            await this.plugin.saveSettings();
-            this.plugin.reevaluate();
-          })
-      );
-
+    // ── 轉換運算符值 ──
     new Setting(containerEl)
       .setName('轉換運算符值')
       .setDesc('開啟後 path:、tag:、file: 等搜索運算符後面的中文也會被轉換。')
@@ -131,6 +104,36 @@ export class STSearchSettingTab extends PluginSettingTab {
     opList.createEl('li', { text: 'tag:劍術 → tag:劍術 OR tag:剑术  ← 同時命中簡繁標籤' });
     opDesc.createEl('p', { text: '關閉則只轉換純文字，運算符後的值保持原樣。' });
 
+    // ── 展開延遲 ──
+    new Setting(containerEl)
+      .setName('展開延遲')
+      .setDesc('打字結束後等待多少毫秒再展開查詢。預設 800ms。數值越小展開越快，但容易在打字中途誤展開。')
+      .addSlider(slider =>
+        slider
+          .setLimits(200, 2000, 100)
+          .setValue(this.plugin.settings.debounceMs)
+          .setDynamicTooltip()
+          .onChange(async value => {
+            this.plugin.settings.debounceMs = value;
+            await this.plugin.saveSettings();
+            this.plugin.reevaluate();
+          })
+      );
+
+    // ── 簡化搜索欄模式 ──
+    new Setting(containerEl)
+      .setName('簡化搜索欄模式')
+      .setDesc('開啟後搜索欄只顯示你輸入的原文（如「剑」），不顯示展開後的 (剑) OR (劍)。搜尋結果仍會同時包含繁簡匹配。')
+      .addToggle(toggle =>
+        toggle
+          .setValue(this.plugin.settings.silentMode)
+          .onChange(async value => {
+            this.plugin.settings.silentMode = value;
+            await this.plugin.saveSettings();
+            this.plugin.reevaluate();
+          })
+      );
+
     // ════════════════════════════════════════
     //  關於
     // ════════════════════════════════════════
@@ -156,16 +159,5 @@ export class STSearchSettingTab extends PluginSettingTab {
       margin-top: 4px;
       color: var(--text-accent);
     `;
-
-    // ── 使用範例 ──
-    containerEl.createEl('h3', { text: '使用範例' });
-
-    const example = containerEl.createEl('div', { cls: 'setting-item' });
-    example.createEl('p', {
-      text: '在全局搜索中輸入簡體或繁體，搜索結果都會包含簡體和繁體。',
-    });
-    example.createEl('p', {
-      text: '例如，搜索「剑」→ 返回 剑法.md 和 劍法.md',
-    });
   }
 }
