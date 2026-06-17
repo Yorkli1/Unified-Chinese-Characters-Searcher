@@ -1,9 +1,9 @@
 {
 	"id": "simplified-traditional-search",
-	"name": "Simplified-Traditional Search",
-	"version": "1.8.4",
+	"name": "統一中文搜索工具",
+	"version": "2.0.0",
 	"minAppVersion": "1.5.0",
-	"description": "在 Obsidian 全局搜索中自動匹配簡體與繁體中文 — 輸入「剑」也搜得到「劍」",
+	"description": "在 Obsidian 全局搜索中自動匹配多種地區的中文 — 輸入任何一個中文字都能找到所有對應中文的結果",
 	"author": "York Li",
 	"authorUrl": "",
 	"isDesktopOnly": false

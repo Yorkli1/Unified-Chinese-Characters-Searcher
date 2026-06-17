@@ -32,9 +32,9 @@ export class STSearchSettingTab extends PluginSettingTab {
     const { containerEl } = this;
     containerEl.empty();
 
-    containerEl.createEl('h2', { text: 'Simplified–Traditional Search' });
+    containerEl.createEl('h2', { text: '統一中文搜索工具' });
     containerEl.createEl('p', {
-      text: '在 Obsidian 全局搜索中自動匹配簡體與繁體中文，讓你輸入任何一種寫法都能找到所有結果。',
+      text: 'Unified Chinese Search — 在 Obsidian 全局搜索中自動匹配多種地區的中文，讓你輸入任何一個中文字都能找到所有對應中文的結果。',
       cls: 'setting-item-description',
     });
 
@@ -45,7 +45,6 @@ export class STSearchSettingTab extends PluginSettingTab {
 
     new Setting(containerEl)
       .setName('啟用插件')
-      .setDesc('關閉後插件不影響搜索行為，所有設置保留。')
       .addToggle(toggle =>
         toggle
           .setValue(this.plugin.settings.enabled)
@@ -188,38 +187,6 @@ export class STSearchSettingTab extends PluginSettingTab {
             this.plugin.reevaluate();
           })
       );
-
-    // ════════════════════════════════════════
-    //  關於
-    // ════════════════════════════════════════
-    containerEl.createEl('hr');
-    containerEl.createEl('h3', { text: '關於' });
-
-    const about = containerEl.createEl('div', { cls: 'setting-item' });
-
-    // ── 映射數據量 ──
-    const statsDiv = about.createEl('div');
-    statsDiv.style.cssText = `
-      padding: 8px 12px;
-      background: var(--background-secondary);
-      border-radius: 6px;
-      font-size: var(--font-smaller);
-      line-height: 1.8;
-      margin-bottom: 12px;
-    `;
-    statsDiv.createEl('p', { text: '已內置 OpenCC 數據：' });
-    statsDiv.createEl('p', { text: `STCharacters.txt  — ${variantStats.s2tCount} 條 簡→繁（通用）` });
-    statsDiv.createEl('p', { text: `TSCharacters.txt  — ${variantStats.t2sCount} 條 繁→簡（通用）` });
-    statsDiv.createEl('p', { text: `HKVariants.txt    — ${variantStats.hkVariantCount} 條 香港變體` });
-    statsDiv.createEl('p', { text: `TWVariants.txt    — ${variantStats.twVariantCount} 條 台灣變體` });
-    statsDiv.createEl('p', { text: `STPhrases.txt     — ${variantStats.stPhraseCount} 條 短語（按需載入）` });
-    statsDiv.createEl('p', { text: `TSPhrases.txt     — ${variantStats.tsPhraseCount} 條 短語（按需載入）` });
-    statsDiv.createEl('p', {
-      text: `來源: ${variantStats.source} · 版本: ${variantStats.version}`,
-    });
-    about.createEl('p', {
-      text: '總計 7 份映射表，6 份打包於 main.js，短語表 st_phrases.json + ts_phrases.json 按需載入。完全離線運行。',
-    });
 
     // ── GitHub 按鈕 ──
     new Setting(containerEl)

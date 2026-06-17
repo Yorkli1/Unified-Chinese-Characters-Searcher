@@ -1,6 +1,6 @@
-# 繁簡搜索統一
+# 統一中文搜索工具
 
-> **在 Obsidian 全局搜索中自動匹配簡體與繁體中文 — 不論用哪種寫法搜，結果都包含兩種**
+> **Unified Chinese Search — 在 Obsidian 全局搜索中自動匹配多種地區的中文，讓你輸入任何一個中文字都能找到所有對應中文的結果**
 
 ![Obsidian](https://img.shields.io/badge/Obsidian-Plugin-7C3AED?logo=obsidian)
 ![Version](https://img.shields.io/github/v/release/Yorkli1/obsidian-simplified-traditional-search)
