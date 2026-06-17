@@ -1,4 +1,4 @@
-# Unified Chinese-characters Searcher (UCCS)
+# Unified Chinese-Characters Searcher (UCCS)
 
 > **在 Obsidian 全局搜索中自動匹配多種地區的中文，讓你輸入任何一個中文字都能找到所有對應中文的結果**
 
