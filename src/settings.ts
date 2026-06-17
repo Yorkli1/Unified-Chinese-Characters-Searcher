@@ -191,16 +191,16 @@ export class STSearchSettingTab extends PluginSettingTab {
       line-height: 1.8;
       margin-bottom: 12px;
     `;
-    statsDiv.createEl('p', { text: '字符映射數據' });
-    statsDiv.createEl('p', { text: `簡→繁: ${variantStats.s2tCount} 條映射` });
-    statsDiv.createEl('p', { text: `繁→簡: ${variantStats.t2sCount} 條映射` });
-    statsDiv.createEl('p', { text: `香港變體: ${variantStats.hkVariantCount} 條` });
-    statsDiv.createEl('p', { text: `台灣變體: ${variantStats.twVariantCount} 條` });
+    statsDiv.createEl('p', { text: '已內置 OpenCC 數據：' });
+    statsDiv.createEl('p', { text: `STCharacters.txt  — ${variantStats.s2tCount} 條 簡→繁（通用）` });
+    statsDiv.createEl('p', { text: `TSCharacters.txt  — ${variantStats.t2sCount} 條 繁→簡（通用）` });
+    statsDiv.createEl('p', { text: `HKVariants.txt    — ${variantStats.hkVariantCount} 條 香港變體` });
+    statsDiv.createEl('p', { text: `TWVariants.txt    — ${variantStats.twVariantCount} 條 台灣變體` });
     statsDiv.createEl('p', {
       text: `來源: ${variantStats.source} · 版本: ${variantStats.version}`,
     });
     about.createEl('p', {
-      text: '插件僅處理字對字轉換，不含短語/慣用語層級。完全離線運行，零外部請求。',
+      text: '總計 5 份映射表，完全離線運行。插件僅處理字對字轉換，不含短語/慣用語層級。',
     });
 
     // ── GitHub 按鈕 ──
