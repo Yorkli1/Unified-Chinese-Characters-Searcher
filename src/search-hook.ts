@@ -10,6 +10,8 @@ export class SearchHook {
   private converter: ChineseConverter;
   private inputEl: HTMLInputElement | null = null;
   private isUpdating = false;
+  /** 輸入法正在組合中（如拼音輸入法未確認前） */
+  private isComposing = false;
   /** 用戶最後一次手動輸入後的值（排除插件自動展開） */
   private lastUserValue = '';
   private observeTimer: number | null = null;
@@ -52,6 +54,9 @@ export class SearchHook {
     this.inputEl = input;
 
     input.addEventListener('input', this._onInput);
+    // 輸入法組合中不處理（避免拼音輸入過程中誤展開）
+    input.addEventListener('compositionstart', this._onCompositionStart);
+    input.addEventListener('compositionend', this._onCompositionEnd);
     this._setupFallback(container);
 
     this._processInput(input);
@@ -66,6 +71,8 @@ export class SearchHook {
   private _unhook(): void {
     if (this.inputEl) {
       this.inputEl.removeEventListener('input', this._onInput);
+      this.inputEl.removeEventListener('compositionstart', this._onCompositionStart);
+      this.inputEl.removeEventListener('compositionend', this._onCompositionEnd);
       this.inputEl = null;
     }
     if (this.observeTimer !== null) {
@@ -90,6 +97,19 @@ export class SearchHook {
   }
 
   private _onInput = (evt: Event): void => {
+    const input = evt.target as HTMLInputElement;
+    // 輸入法組合中不處理（如拼音/倉頡的未確認階段）
+    if (this.isComposing) return;
+    this._processInput(input);
+  };
+
+  private _onCompositionStart = (): void => {
+    this.isComposing = true;
+  };
+
+  private _onCompositionEnd = (evt: CompositionEvent): void => {
+    this.isComposing = false;
+    // 輸入法確認後，處理最終輸入的值
     const input = evt.target as HTMLInputElement;
     this._processInput(input);
   };
