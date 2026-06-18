@@ -224,8 +224,7 @@ export class SearchHook {
 
     this.isUpdating = true;
     input.value = expanded;
-    input.dispatchEvent(new Event('input', { bubbles: true }));
-    input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+    input.dispatchEvent(new Event('input', { bubbles: true, cancelable: true }));
 
     if (this.silentMode) {
       requestAnimationFrame(() => {
