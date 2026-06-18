@@ -8,6 +8,8 @@ import s2all from './data/s2all.json';
 import hkVariants from './data/hk_variants.json';
 import twVariants from './data/tw_variants.json';
 import hkTwBidi from './data/hk_tw.json';
+import stPhrases from './data/st_phrases.json';
+import tsPhrases from './data/ts_phrases.json';
 
 export type Region = 'hk' | 'tw' | 'all' | 'tw-hk';
 
@@ -27,8 +29,8 @@ export const variantStats: VariantStats = {
   t2sCount: Object.keys(t2sGen).length,
   hkVariantCount: Object.keys(hkVariants).length,
   twVariantCount: Object.keys(twVariants).length,
-  stPhraseCount: 0,
-  tsPhraseCount: 0,
+  stPhraseCount: Object.keys(stPhrases).length,
+  tsPhraseCount: Object.keys(tsPhrases).length,
   source: 'OpenCC',
   version: '2024',
 };
@@ -45,6 +47,17 @@ export class ChineseConverter {
 
   getRegion(): Region {
     return this.region;
+  }
+
+  /**
+   * 查詢短語/成語的繁簡變體
+   */
+  getPhraseVariant(text: string): string | undefined {
+    const s2t = (stPhrases as Record<string, string>)[text];
+    if (s2t) return s2t;
+    const t2s = (tsPhrases as Record<string, string>)[text];
+    if (t2s) return t2s;
+    return undefined;
   }
 
   /**

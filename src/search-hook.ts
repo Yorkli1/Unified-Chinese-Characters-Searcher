@@ -19,6 +19,7 @@ export class SearchHook {
     private keepOperators: boolean,
     private silentMode: boolean,
     private debounceMs: number,
+    private phraseEnabled: boolean,
   ) {
   }
 
@@ -37,6 +38,10 @@ export class SearchHook {
 
   setDebounceMs(ms: number): void {
     this.debounceMs = ms;
+  }
+
+  setPhraseEnabled(enabled: boolean): void {
+    this.phraseEnabled = enabled;
   }
 
   hook(): boolean {
@@ -267,6 +272,14 @@ export class SearchHook {
 
         for (const alt of allAlts) {
           if (!terms.includes(alt)) terms.push(alt);
+        }
+
+        // 短語補充模組：若短語結果與現有項都不同，補上一個
+        if (this.phraseEnabled) {
+          const phraseVariant = this.converter.getPhraseVariant(token.value);
+          if (phraseVariant && !terms.includes(phraseVariant)) {
+            terms.push(phraseVariant);
+          }
         }
 
         if (terms.length > 1) {

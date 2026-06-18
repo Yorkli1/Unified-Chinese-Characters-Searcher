@@ -8,6 +8,7 @@ export interface STSearchSettings {
   keepOperators: boolean;
   silentMode: boolean;
   debounceMs: number;
+  phraseEnabled: boolean;
 }
 
 export const DEFAULT_SETTINGS: STSearchSettings = {
@@ -16,6 +17,7 @@ export const DEFAULT_SETTINGS: STSearchSettings = {
   keepOperators: true,
   silentMode: false,
   debounceMs: 800,
+  phraseEnabled: false,
 };
 
 export class STSearchSettingTab extends PluginSettingTab {
@@ -167,6 +169,20 @@ export class STSearchSettingTab extends PluginSettingTab {
           .setValue(this.plugin.settings.silentMode)
           .onChange(async value => {
             this.plugin.settings.silentMode = value;
+            await this.plugin.saveSettings();
+            this.plugin.reevaluate();
+          })
+      );
+
+    // ── 短語/成語補充轉換 ──
+    new Setting(containerEl)
+      .setName('短語/成語補充轉換')
+      .setDesc('字符轉換無法處理時，補充短語級轉換（例如：老板 → 老闆）。僅在結果不同時追加。')
+      .addToggle(toggle =>
+        toggle
+          .setValue(this.plugin.settings.phraseEnabled)
+          .onChange(async value => {
+            this.plugin.settings.phraseEnabled = value;
             await this.plugin.saveSettings();
             this.plugin.reevaluate();
           })
