@@ -8,6 +8,8 @@ import s2all from './data/s2all.json';
 import hkVariants from './data/hk_variants.json';
 import twVariants from './data/tw_variants.json';
 import hkTwBidi from './data/hk_tw.json';
+import stPhrases from './data/st_phrases.json';
+import tsPhrases from './data/ts_phrases.json';
 
 export type Region = 'hk' | 'tw' | 'all' | 'tw-hk';
 
@@ -38,20 +40,19 @@ export const variantStats: VariantStats = {
  */
 export class ChineseConverter {
   private region: Region = 'hk';
-  private s2tPhraseMap: Map<string, string> | null = null;
-  private t2sPhraseMap: Map<string, string> | null = null;
+  private s2tPhraseMap: Map<string, string>;
+  private t2sPhraseMap: Map<string, string>;
 
-  /**
-   * 載入短語映射數據（從外部 JSON 按需載入）
-   */
-  loadPhraseData(stData: Record<string, string>, tsData: Record<string, string>): void {
-    this.s2tPhraseMap = new Map(Object.entries(stData));
-    this.t2sPhraseMap = new Map(Object.entries(tsData));
+  constructor() {
+    this.s2tPhraseMap = new Map(Object.entries(stPhrases));
+    this.t2sPhraseMap = new Map(Object.entries(tsPhrases));
   }
 
-  /** 短語數據是否已載入 */
+  /**
+   * 短語數據是否已載入（打包進 main.js，始終可用）
+   */
   get isPhraseLoaded(): boolean {
-    return this.s2tPhraseMap !== null;
+    return true;
   }
 
   setRegion(region: Region): void {
