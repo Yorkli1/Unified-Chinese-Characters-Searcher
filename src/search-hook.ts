@@ -176,9 +176,12 @@ export class SearchHook {
     }
 
     // 7. 不需要轉換（同方向文字）
+    //    但有短語時仍繼續（短語可能涵蓋字符轉換無法處理的詞）
     if (!this.converter.needsConversion(currentValue)) {
-      this.lastUserValue = currentValue;
-      return;
+      if (!this.phraseEnabled || !this.converter.getPhraseVariant(currentValue)) {
+        this.lastUserValue = currentValue;
+        return;
+      }
     }
 
     // 全部通過 → 防抖展開
@@ -263,11 +266,27 @@ export class SearchHook {
           }
         } else {
           // 多字元：整串統一轉換
-          const converted = chars.map(ch => {
+          // 一般模式 → 1 個轉換結果
+          // 全部地區 → 2 個轉換結果（HK + TW）
+          const region = this.converter.getRegion();
+
+          // HK/預設版（取 v[0]）
+          const hkVersion = chars.map(ch => {
             const v = this.converter.getVariants(ch);
             return v.length > 0 ? v[0] : ch;
           }).join('');
-          if (converted !== token.value) allAlts.push(converted);
+          if (hkVersion !== token.value) allAlts.push(hkVersion);
+
+          // 全部地區版：追加 TW 版（取 v[1] 當與 v[0] 不同時）
+          if (region === 'all') {
+            const twVersion = chars.map(ch => {
+              const v = this.converter.getVariants(ch);
+              return v.length > 1 ? v[1] : ch;
+            }).join('');
+            if (twVersion !== token.value && !allAlts.includes(twVersion)) {
+              allAlts.push(twVersion);
+            }
+          }
         }
 
         for (const alt of allAlts) {
