@@ -130,11 +130,14 @@ export class ChineseConverter {
   }
 
   private _getT2SMap(): Map<string, string> {
-    switch (this.region) {
-      case 'tw': return new Map(Object.entries(t2tw));
-      case 'hk':
-      default:
-        return new Map(Object.entries(t2hk));
+    // t2s 方向不受地區限制：合併所有 t2s 映射
+    // 確保無論輸入哪種繁體都能找到簡體
+    const combined = new Map<string, string>();
+    for (const m of [t2hk, t2tw, t2sGen]) {
+      for (const [k, v] of Object.entries(m)) {
+        if (!combined.has(k)) combined.set(k, v as string);
+      }
     }
+    return combined;
   }
 }
