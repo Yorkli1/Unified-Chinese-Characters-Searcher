@@ -131,9 +131,9 @@ export class ChineseConverter {
         // s2all stores values as arrays
         const m = new Map<string, string[]>();
         for (const [k, v] of Object.entries(s2all)) {
-          m.set(k, v as string[]);
+          m.set(k, v);
         }
-        return m as Map<string, string | string[]>;
+        return m;
       }
       case 'hk':
       default:

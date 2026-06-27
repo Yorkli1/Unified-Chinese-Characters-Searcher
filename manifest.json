@@ -3,7 +3,7 @@
 	"name": "Unified Chinese-characters Searcher (UCCS)",
 	"version": "2.0.0",
 	"minAppVersion": "1.5.0",
-	"description": "在 Obsidian 全局搜索中自動匹配多種地區的中文 — 輸入任何一個中文字都能找到所有對應中文的結果",
+	"description": "解決筆記庫中繁簡中文無法互相搜索的問題，輸入任意中文字即可找到所有對應結果.",
 	"author": "York Li",
 	"authorUrl": "",
 	"isDesktopOnly": false

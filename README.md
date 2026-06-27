@@ -1,11 +1,19 @@
 # Unified Chinese-Characters Searcher (UCCS)
 
-> **在 Obsidian 全局搜索中自動匹配多種地區的中文，讓你輸入任何一個中文字都能找到所有對應中文的結果**
+> **Automatically match Simplified and Traditional Chinese in Obsidian's global search — type any Chinese character and find all variant results across regions.**
 
 ![Obsidian](https://img.shields.io/badge/Obsidian-Plugin-7C3AED?logo=obsidian)
 ![Version](https://img.shields.io/github/v/release/Yorkli1/Unified-Chinese-characters-Searcher)
 ![License](https://img.shields.io/badge/License-Apache%202.0-blue)
 [![Ko-fi](https://img.shields.io/badge/Ko--fi-Support-FF5E5B?logo=ko-fi)](https://ko-fi.com/omgyork)
+
+---
+
+## Overview
+
+UCCS is an Obsidian plugin that expands your search query in real time to cover both Simplified and Traditional Chinese character variants. When you type a keyword in global search (`Cmd+Shift+F`), the plugin automatically generates an `OR` query with all relevant character variants, so you never miss a note due to font or regional differences.
+
+It supports four mapping modes: Simplified↔Traditional (Hong Kong), Simplified↔Traditional (Taiwan), All Regions, and Traditional HK↔Traditional TW.
 
 ---
 

@@ -32,7 +32,7 @@ export class STSearchSettingTab extends PluginSettingTab {
     const { containerEl } = this;
     containerEl.empty();
 
-    containerEl.createEl('h2', { text: 'Unified Chinese-characters Searcher (UCCS)' });
+    new Setting(containerEl).setName('Unified Chinese-characters Searcher (UCCS)').setHeading();
     containerEl.createEl('p', {
       text: '在 Obsidian 全局搜索中自動匹配多種地區的中文，讓你輸入任何一個中文字都能找到所有對應中文的結果。',
       cls: 'setting-item-description',
@@ -41,7 +41,7 @@ export class STSearchSettingTab extends PluginSettingTab {
     // ════════════════════════════════════════
     //  基本設置
     // ════════════════════════════════════════
-    containerEl.createEl('h3', { text: '基本設置' });
+    new Setting(containerEl).setName('基本設置').setHeading();
 
     new Setting(containerEl)
       .setName('啟用插件')
@@ -74,25 +74,16 @@ export class STSearchSettingTab extends PluginSettingTab {
 
     // ── 地區差異對照 ──
     const regionNote = containerEl.createEl('div', {
-      cls: 'setting-item-description',
+      cls: 'uccs-settings-note',
     });
-    regionNote.style.cssText = `
-      margin: 0 0 12px 0;
-      padding: 8px 12px;
-      background: var(--background-secondary);
-      border-radius: 6px;
-      font-size: var(--font-smaller);
-      line-height: 1.6;
-    `;
     regionNote.createEl('p', { text: '不同模式的匹配方式：' });
 
-    const table = regionNote.createEl('table');
-    table.style.cssText = 'width:100%; border-collapse: collapse;';
+    const table = regionNote.createEl('table', { cls: 'uccs-settings-table' });
     const thead = table.createEl('thead');
     const headerRow = thead.createEl('tr');
     const headers = ['模式', '用戶輸入(簡/繁)', '涵蓋搜索結果'];
     for (const h of headers) {
-      headerRow.createEl('th', { text: h }).style.cssText = 'text-align:left; padding:4px 8px; border-bottom:1px solid var(--background-modifier-border);';
+      headerRow.createEl('th', { text: h });
     }
 
     const tbody = table.createEl('tbody');
@@ -105,14 +96,14 @@ export class STSearchSettingTab extends PluginSettingTab {
     for (const cells of rows) {
       const tr = tbody.createEl('tr');
       for (const cell of cells) {
-        tr.createEl('td', { text: cell }).style.cssText = 'padding:2px 8px;';
+        tr.createEl('td', { text: cell });
       }
     }
 
     regionNote.createEl('p', { text: '*繁體(HK)和繁體(TW)大部分寫法相同，應用此選項僅在繁體(HK)和繁體(TW)之間有差異時進行展開且不會匹配簡體中文。' });
     //  高級功能
     // ════════════════════════════════════════
-    containerEl.createEl('h3', { text: '高級功能' });
+    new Setting(containerEl).setName('高級功能').setHeading();
 
     // ── 轉換運算符值 ──
     new Setting(containerEl)
@@ -130,16 +121,8 @@ export class STSearchSettingTab extends PluginSettingTab {
 
     // ── 運算符說明 ──
     const opDesc = containerEl.createEl('div', {
-      cls: 'setting-item-description',
+      cls: 'uccs-settings-note',
     });
-    opDesc.style.cssText = `
-      margin: 0 0 12px 0;
-      padding: 8px 12px;
-      background: var(--background-secondary);
-      border-radius: 6px;
-      font-size: var(--font-smaller);
-      line-height: 1.6;
-    `;
     opDesc.createEl('p', { text: '例如選用「全部地區」時：' });
     opDesc.createEl('p', { text: 'tag：里巷  = 【 tag：里巷 OR tag：裏巷 OR tag：裡巷】' });
     opDesc.createEl('p', { text: '關閉則此選項則：tag：里巷 =【tag：里巷】，【tag：裏巷】和【tag：裡巷】不會被觸發。' });
@@ -152,7 +135,6 @@ export class STSearchSettingTab extends PluginSettingTab {
         slider
           .setLimits(200, 2000, 100)
           .setValue(this.plugin.settings.debounceMs)
-          .setDynamicTooltip()
           .onChange(async value => {
             this.plugin.settings.debounceMs = value;
             await this.plugin.saveSettings();
@@ -216,14 +198,8 @@ export class STSearchSettingTab extends PluginSettingTab {
 
     // ── 版權與授權 ──
     const notice = containerEl.createEl('p', {
-      cls: 'setting-item-description',
+      cls: 'uccs-settings-notice',
     });
-    notice.style.cssText = `
-      margin-top: 16px;
-      font-size: var(--font-smallest);
-      color: var(--text-muted);
-      line-height: 1.5;
-    `;
     notice.createEl('span', { text: '字符映射數據源自 ' });
     notice.createEl('a', {
       text: 'OpenCC',

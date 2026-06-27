@@ -22,9 +22,9 @@ export default class STSearchPlugin extends Plugin {
       this.app.workspace.on('active-leaf-change', () => this._tryHook())
     );
 
-    setTimeout(() => this._tryHook(), 500);
-    setTimeout(() => this._tryHook(), 1500);
-    setTimeout(() => this._tryHook(), 3000);
+    window.setTimeout(() => this._tryHook(), 500);
+    window.setTimeout(() => this._tryHook(), 1500);
+    window.setTimeout(() => this._tryHook(), 3000);
 
     console.log('Simplified-Traditional Search: plugin loaded');
   }
@@ -36,7 +36,7 @@ export default class STSearchPlugin extends Plugin {
   }
 
   async loadSettings(): Promise<void> {
-    this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
+    this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData() as Partial<STSearchSettings>);
   }
 
   async saveSettings(): Promise<void> {

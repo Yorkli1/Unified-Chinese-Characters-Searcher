@@ -1,3 +1,4 @@
+import type { App } from 'obsidian';
 import { ChineseConverter, type Region } from './converter';
 
 /**
@@ -48,12 +49,12 @@ export class SearchHook {
     const searchLeaf = app.workspace.getLeavesOfType('search')[0];
     if (!searchLeaf) return false;
 
-    const container = (searchLeaf.view as any)?.containerEl as HTMLElement | null;
+    const container: HTMLElement | null = searchLeaf.view?.containerEl ?? null;
     if (!container) return false;
 
-    const input = container.querySelector(
+    const input = container.querySelector<HTMLInputElement>(
       '.search-input-container input, input[type="search"], input[placeholder*="搜索"], input[placeholder*="Search"], input[placeholder*="搜尋"]'
-    ) as HTMLInputElement | null;
+    );
     if (!input) return false;
 
     if (this.inputEl === input) return true;
@@ -82,7 +83,7 @@ export class SearchHook {
       this.inputEl = null;
     }
     if (this.observeTimer !== null) {
-      clearInterval(this.observeTimer);
+      window.clearInterval(this.observeTimer);
       this.observeTimer = null;
     }
   }
@@ -210,7 +211,7 @@ export class SearchHook {
 
   private _cancelDebounce(): void {
     if (this.debounceTimer !== null) {
-      clearTimeout(this.debounceTimer);
+      window.clearTimeout(this.debounceTimer);
       this.debounceTimer = null;
     }
   }
@@ -237,7 +238,7 @@ export class SearchHook {
     input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true }));
 
     if (this.silentMode) {
-      requestAnimationFrame(() => {
+      window.requestAnimationFrame(() => {
         input.value = originalValue;
         this.isUpdating = false;
       });
@@ -375,4 +376,4 @@ interface Token {
   value: string;
 }
 
-declare var app: any;
+declare const app: App;
