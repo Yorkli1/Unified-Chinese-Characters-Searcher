@@ -32,12 +32,6 @@ export class STSearchSettingTab extends PluginSettingTab {
     const { containerEl } = this;
     containerEl.empty();
 
-    new Setting(containerEl).setName('Unified Chinese-characters Searcher (UCCS)').setHeading();
-    containerEl.createEl('p', {
-      text: '在 Obsidian 全局搜索中自動匹配多種地區的中文，讓你輸入任何一個中文字都能找到所有對應中文的結果。',
-      cls: 'setting-item-description',
-    });
-
     // ════════════════════════════════════════
     //  基本設置
     // ════════════════════════════════════════

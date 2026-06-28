@@ -147,7 +147,7 @@ export class ChineseConverter {
     const combined = new Map<string, string>();
     for (const m of [t2hk, t2tw, t2sGen]) {
       for (const [k, v] of Object.entries(m)) {
-        if (!combined.has(k)) combined.set(k, v as string);
+        if (!combined.has(k)) combined.set(k, v);
       }
     }
     return combined;
